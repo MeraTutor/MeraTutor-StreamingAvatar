@@ -1,0 +1,100 @@
+<title>
+    Canvas Sample
+  </title>
+  <p>
+    <canvas id="sample-canvas" width="256" height="256"></canvas>
+  </p>
+  <p>
+    <button id="send-canvas">
+      Send canvas
+    </button>
+    <label for="send-as-div">
+      <input type="checkbox" id="send-as-div">
+        Send as div
+      </input>
+    </label>
+  </p>
+  <p id="output-console"></p>
+  
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script>
+    // NOTE Simple IO console element for socket communication
+    let outputConsole = document.querySelector('#output-console');
+    let printToConsole = (text = '') => {
+      outputConsole.innerHTML += text + '<br/>';
+    };
+    let renderToConsole = (element) => {
+      outputConsole.appendChild(element);
+      outputConsole.innerHTML += '<br/>';
+    };
+  
+    // NOTE Load image (random cat image)
+    let image = new Image(250, 250);
+    image.src = 'http://thecatapi.com/api/images/get?format=src&size=small';
+    printToConsole('Image loading.');
+  
+    // NOTE Setup canvas
+    // Render the cat image when it is loaded.
+    let canvas = document.querySelector('#sample-canvas');
+    let context = canvas.getContext('2d');
+  
+    image.addEventListener('load', () => {
+      context.drawImage(image, 0, 0);
+      printToConsole('Image loaded.');
+    });
+  
+    image.addEventListener('error', (error) => {
+      printToConsole('Image error.' + JSON.strinfify(error));
+    });
+  
+    // NOTE Setup a websocket
+    // Socket will allow to send 'img' message with either a base64 encoded
+    // image data, or a rendered HTML Image element.
+    let socket = io('ws://localhost:8080/');
+  
+    socket.on('error', (error) => {
+      printToConsole('Socket error.' + JSON.stringify(error));
+    });
+  
+    socket.on('img', (image) => {
+      let renderedImage = null;
+  
+      if (image.indexOf('data:image/') === 0) {
+  
+        // NOTE If we receive a base64 image, we render it as an Image
+        renderedImage = new Image(250, 250);
+        renderedImage.src = image;
+      } else {
+  
+        // NOTE If we receive a rendered <img> element, we render it directly
+        // via document.createElement
+        renderedImage = document.createElement('div');
+        renderedImage.innerHTML = image;
+      }
+  
+      printToConsole('Received image.');
+      renderToConsole(renderedImage);
+    });
+  
+    // NOTE Setup button
+    let sendButton = document.querySelector('#send-canvas');
+  
+    sendButton.addEventListener('click', () => {
+      let encodedCanvas = canvas.toDataURL();
+      let sendAsDiv = document.querySelector('#send-as-div').checked;
+      let payload = null;
+  
+      if (sendAsDiv) {
+        let imageElement = new Image(250, 250);
+        imageElement.src = encodedCanvas;
+  
+        payload = imageElement.outerHTML;
+      } else {
+        payload = encodedCanvas;
+      }
+  
+      socket.emit('img', payload);
+  
+      printToConsole('Image sent.');
+    });
+  </script>

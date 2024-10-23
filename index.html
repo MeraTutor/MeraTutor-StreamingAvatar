@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="index.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<style>
+.w3-sidebar a {font-family: "Roboto", sans-serif}
+body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
+
+#output-console {
+    background-color: black; 
+    color: white; 
+    padding: 10px; 
+    border-radius: 5px; 
+    overflow-y: scroll;
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+}
+
+#status {
+    display: none; /* Hide the status element initially */
+}
+</style>
+</head>
+<body class="w3-content" style="max-width:1200px">
+
+<!-- Sidebar/menu -->
+<!-- <nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:250px" id="mySidebar">
+  <div class="w3-container w3-display-container w3-padding-16">
+    <i onclick="w3_close()" class="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
+    <h3 class="w3-wide"><b>AI TUTOR</b></h3>
+  </div>
+  <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
+    <a href="#" class="w3-bar-item w3-button">Languages</a>
+    <a href="#" class="w3-bar-item w3-button">Maths</a>
+    <a onclick="myAccFunc()" href="javascript:void(0)" class="w3-button w3-block w3-white w3-left-align" id="myBtn">
+      Science <i class="fa fa-caret-down"></i>
+    </a>
+    
+  </div>
+</nav> -->
+
+<!-- Top menu on small screens -->
+<header class="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
+  <div class="w3-bar-item w3-padding-24 w3-wide">LOGO</div>
+  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding-2 w3-right" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+</header>
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:50px">
+    <div class="main">
+      <div class="actionRowsWrap" >
+        <div class="actionRow" style="display: none;">
+          <label>
+            AvatarID
+            <input id="avatarID" type="text" />
+          </label>
+
+          <label>
+            VoiceID
+            <input id="voiceID" type="text" />
+          </label>
+        </div>
+        <div class="actionRow">
+          <button id="newBtn">New</button>
+          <button id="startBtn">Start</button>
+          <button id="closeBtn">Close</button>
+          <!-- Toggle Status Button -->
+          <button id="toggle-status-button">
+            <i class="fa fa-eye" aria-hidden="true"></i> Toggle Status
+          </button>
+          <button id="toggle-upload-button">
+            <i class="fa fa-eye" aria-hidden="true"></i> Manage Upload
+          </button>
+        
+        </div>
+        <div id="actionRow1" class="actionRow" style="display: none;">
+          <input id="taskInput" type="text" value="Please explain water cycle for grade 4."/>
+          <button id="repeatBtn" style="display: none;">Repeat</button>
+          <button id="talkBtn">Send</button>
+          
+          <input type="file" id="fileInput"/>
+          <button id="uploadBtn" onclick="alert('Uploaded..Processing..')">Upload</button>
+        </div>
+      </div>
+      
+      <div class="videoSectionWrap">
+        <div class="videoWrap">
+          <video id="mediaElement" class="videoEle show" autoplay></video>
+          <canvas id="canvasElement" class="videoEle hide"></canvas>
+        </div>
+
+        <div class="actionRow switchRow hide" id="bgCheckboxWrap">
+          <div class="switchWrap"  style="display: none;">
+            <span>Remove background</span>
+            <label class="switch">
+              <input type="checkbox" id="removeBGCheckbox" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <label  style="display: none;">
+            Background (CSS)
+            <input
+              type="text"
+              id="bgInput"
+              value='url("https://app.heygen.com/icons/heygen/logo_hori_text_light_bg.svg") center / contain no-repeat'
+            />
+          </label>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div id="output-console">
+          <!-- Output will be displayed here -->
+          <!-- <input id="taskInput" type="text" placeholder="Ask Questions?"/>
+          <button id="repeatBtn" style="display: none;">Repeat</button>
+          <button id="talkBtn">Send</button> -->
+        </div>
+        
+        <div id="control-btn" class="actionRow pt-2">
+          <button id="copy-text-button" class="btn btn-secondary btn-sm">
+            <i class="fa fa-copy" aria-hidden="true"></i> Copy Text
+          </button>
+          <button id="clear-button" class="btn btn-secondary btn-sm">
+            <i class="fa fa-trash" aria-hidden="true"></i>Clear</button>
+        </div>
+        
+        <hr>
+        <div id="control-btn" class="actionRow">          
+          <input id="askInput" type="text" placeholder="Ask Questions?"/>
+          <!-- Speak to Text Button -->
+          
+            <!-- Speak to Text Button with Icon -->
+            <audio id="click-sound" src="prompt-sound.wav" preload="auto"></audio>
+
+          <button id="speechInput" class="btn btn-danger">
+            <i class="fa fa-microphone" aria-hidden="true"></i> Speak
+          </button>
+          <!-- Big Circular Interrupt Button -->
+          <button id="interrupt-button">
+            <i class="fa fa-stop" aria-hidden="true"></i> Interrupt
+          </button>
+          <button id="repeatBtn" style="display: none;">Repeat</button>
+          <button id="askBtn">Send</button>
+          <button id="speechBtn" style="display: none;">speech</button>
+          
+          
+
+        </div>
+      </div>
+      <p id="status"></p>
+
+      
+    </div>
+
+    <script type="module" src="index.js"></script>
+    <script>
+
+    //hide output-console
+    document.getElementById("output-console").style.display = "none";
+    document.getElementById("actionRow1").style.display = "none";
+    // document.getElementById("control-btn").style.display = "none";
+
+    document.getElementById("toggle-status-button").addEventListener("click", function() {
+      const statusElement = document.getElementById("status");
+      if (statusElement.style.display === "none" || statusElement.style.display === "") {
+          statusElement.style.display = "block"; // Show the status element
+      } else {
+          statusElement.style.display = "none"; // Hide the status element
+      }
+  });
+
+  document.getElementById("toggle-upload-button").addEventListener("click", function() {
+      const statusElement = document.getElementById("actionRow1");
+      if (statusElement.style.display === "none" || statusElement.style.display === "") {
+          statusElement.style.display = "block"; // Show the status element
+      } else {
+          statusElement.style.display = "none"; // Hide the status element
+      }
+  });
+
+    // Show output-console
+    function showOutputConsole() {
+      document.getElementById("actionRow1").style.display = "block";
+      document.getElementById("output-console").style.display = "block";
+      document.getElementById("control-btn").style.display = "block";
+    }
+
+    // Hide output-console
+    function hideOutputConsole() {
+      document.getElementById("output-console").style.display = "none";
+      document.getElementById("control-btn").style.display = "none";
+    }
+    
+    function displayTextSlowly(text, delay) {
+      const outputDiv = document.getElementById("output-console");
+      outputDiv.innerHTML = ""; // Clear previous content
+      let index = 0;
+  
+      function type() {
+          if (index < text.length) {
+              outputDiv.innerHTML += text.charAt(index);
+              index++;
+              setTimeout(type, delay); // Call the function again after the specified delay
+          }
+      }
+  
+      type(); // Start typing
+  }
+
+  document.getElementById("clear-button").addEventListener("click", function() {
+    const outputDiv = document.getElementById("output-console");
+    outputDiv.innerHTML = ""; // Clear the content of the output console
+});
+
+// Copy Text button functionality
+document.getElementById("copy-text-button").addEventListener("click", function() {
+    const outputDiv = document.getElementById("output-console");
+    const textToCopy = outputDiv.innerText; // Get the text from the output console
+
+    if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            console.log("Text copied to clipboard!");
+            alert("Text copied to clipboard!"); // Alert user for confirmation
+        }).catch(err => {
+            console.error("Failed to copy text: ", err);
+        });
+    } else {
+        alert("Nothing to copy!"); // Alert if there is no text
+    }
+});
+  
+  // // Example usage
+  // const exampleText = "This is a slow display of text.";
+  // displayTextSlowly(exampleText, 100); // 100 milliseconds delay between characters
+
+  // Check if the browser supports SpeechRecognition
+  // Get the audio element
+  const clickSound = document.getElementById("click-sound");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+       // Play the sound
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US'; // Set the language
+      recognition.interimResults = false; // Set to true if you want interim results
+      recognition.maxAlternatives = 1; // Number of alternatives to return
+      
+
+      document.getElementById("speechInput").addEventListener("click", function() {
+          clickSound.play();
+          recognition.start(); // Start the speech recognition
+          console.log("Listening...");
+
+          recognition.onresult = function(event) {
+              const transcript = event.results[0][0].transcript; // Get the recognized text
+              console.log("Recognized text: ", transcript);
+              document.getElementById("askInput").value = transcript; // Display the text in the output console
+              document.querySelector('#speechBtn').click();
+          };
+
+          recognition.onerror = function(event) {
+              console.error("Error occurred in recognition: ", event.error);
+          };
+
+          recognition.onend = function() {
+              console.log("Speech recognition service has stopped.");
+              //click askBtn
+              
+          };
+      });
+  } else {
+      alert("Speech recognition is not supported in this browser.");
+  }
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
